@@ -335,3 +335,54 @@ pub async fn init_db(pool: &Pool) -> Result<(), PostgresStorageError> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use std::env;
+
+    use deadpool_postgres::tokio_postgres::NoTls;
+    use deadpool_postgres::Config;
+    use rand::RngCore;
+
+    use crate::storage::testing::test_suite;
+
+    // This test requires external PostgreSQL instance, so it is ignored by default
+    #[test]
+    #[ignore]
+    fn test_pg_storage() {
+        test_suite(&|| async {
+            // Running each test on a fresh database
+            let dbidx = rand::thread_rng().next_u32();
+            let dbname = format!("postgres_storage_test_{dbidx:08x}");
+
+            let mut initial_cfg = Config::new();
+            initial_cfg.host = Some(env::var("PG_HOST").unwrap().into());
+            initial_cfg.port = Some(env::var("PG_PORT").unwrap().parse().unwrap());
+            initial_cfg.user = Some(env::var("PG_USER").unwrap().into());
+            initial_cfg.password = Some(env::var("PG_PASS").unwrap().into());
+            initial_cfg.dbname = Some("postgres".into());
+            {
+                let initial_pool = initial_cfg.create_pool(None, NoTls).unwrap();
+                let db = initial_pool.get().await.unwrap();
+                db.simple_query(
+                    // CREATE DATABASE does not support parameters
+                    // language=PostgreSQL
+                    &format!("CREATE DATABASE {dbname};"),
+                )
+                .await
+                .unwrap();
+            }
+
+            let mut cfg = initial_cfg.clone();
+            cfg.dbname = Some(dbname);
+            let pool = cfg.create_pool(None, NoTls).unwrap();
+
+            init_db(&pool).await.unwrap();
+
+            PostgresStorage::new(pool)
+        })
+        .unwrap()
+    }
+}
