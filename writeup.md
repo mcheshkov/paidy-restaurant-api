@@ -70,3 +70,23 @@ But anyway I want to have no SPOF, so some kind of replicated storage is necessa
 
 I could use something like embedded Raft with in-memory storage, and hope that all of instances
 would never have a power issue. But to simplify, I decided not to.
+
+## Data structure
+
+I don't get a point of having two different requests: one to show all items
+on a table, and another to show a specified item.
+
+In case they return same data it's just a batch and single item version of the same API.
+
+So, I would assume that they should return different data, for a different UX in client app:
+batch version is terse for each item, but whole table at once, and single version is more verbose.
+
+I would skip all the validation for now, and just accept any tables and items.
+I would expect from actual production system to be configured prior to use, so all tables and
+items would be either created in advance, or would have a separate flow for custom one-time orders.
+
+Because we have relatively small unit of partitioning, we can use not-very-scalable approaches,
+like sequences in PostgreSQL.
+
+All requests are formulated as if they are separate transactions, there's no need to provide a way
+to execute several item additions and removals as an atomic operation.
