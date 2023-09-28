@@ -114,6 +114,7 @@ where
                     (table_id, items)
                 };
 
+                info!(?table_id, "Adding items");
                 service.add_items(table_id, items.into_iter()).await?;
             }
             Op::Remove => {
@@ -131,6 +132,7 @@ where
                     // This would remove too much, but only until next list_items
                     known_item_ids.remove(item_id);
                 }
+                info!(?table_id, ?item_ids, "Removing items");
                 service.remove_items(table_id, item_ids.into_iter()).await?;
             }
             Op::List => {
@@ -138,6 +140,7 @@ where
                     let mut rng = rand::thread_rng();
                     gen_table_id(&mut rng)
                 };
+                info!(?table_id, "Listing items");
                 let items = service.list_items(table_id).await?;
                 known_item_ids.extend(items.into_iter().map(|i| i.item_id));
             }
@@ -153,6 +156,7 @@ where
                     };
                     (table_id, item_id)
                 };
+                info!(?table_id, ?item_id, "Reading item");
                 service.get_item(table_id, item_id).await?;
             }
         }
