@@ -90,3 +90,19 @@ like sequences in PostgreSQL.
 
 All requests are formulated as if they are separate transactions, there's no need to provide a way
 to execute several item additions and removals as an atomic operation.
+
+## Rust implementation
+
+I started with a structs and trait that represents underlying storage.
+
+I've used i32 in models just to simplify interop with PostgreSQL: it does not
+support u32, and unsigned integers in general. That's abstraction leak for sure,
+and proper way would be to add storage-specific layer to parse rows as they are stored,
+and then convert to model data.
+
+Returning String and Vec is a bit unfortunate, because of forcing every implementation to make allocations, but it let
+me start with something. This would disallow using patterns like "allocate everything in per-request arena".
+
+Because AFIT is still [not stabilized](https://github.com/rust-lang/rust/pull/115822), I used `async_trait`.
+One downside of this is that all returned futures should be `Send`,
+and that means adding `Send`  bound to all `impl Iterator` parameters
