@@ -106,3 +106,17 @@ me start with something. This would disallow using patterns like "allocate every
 Because AFIT is still [not stabilized](https://github.com/rust-lang/rust/pull/115822), I used `async_trait`.
 One downside of this is that all returned futures should be `Send`,
 and that means adding `Send`  bound to all `impl Iterator` parameters
+
+It is not clear to me whether I can use tools like connection pools for external DBMS. "Classic" RDBMS, like PostgreSQL
+use stateful connections, and tie transaction lifetime to connection. Which means that one need to have multiple connections
+to issue multiple concurrent transactions. Establishing new connection per request will do, but it's not as efficient,
+and good old days of `<?php $db = mysql_connect("localhost", "user", "pass");` are gone. I assumed that I can use pools,
+reverting to connection-per-request should be simple, and we could discuss details about pool implementation later.
+
+What I would probably do differently next time is DB response parsing: I think I'd rather group
+together query text, parameters and results in a single entity, acting like a kind of "stored procedure",
+but in DB client language and environment. Given input parameters (in Rust-friendly way) it could be applied
+to a transaction: encode parameters, execute query, receive response and decode it back to Rust.
+It could prepare itself explicitly in DB connection as well, though with usual statement cache in drivers
+it is not as valuable. Finally, it could run during preflight something like EXPLAIN, and verify that queries
+are syntactically correct and that types in DB match our expected types.
