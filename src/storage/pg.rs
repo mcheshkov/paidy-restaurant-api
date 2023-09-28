@@ -144,6 +144,7 @@ impl PostgresStorage {
             .build_transaction()
             .isolation_level(IsolationLevel::Serializable)
             .read_only(true)
+            .deferrable(true)
             .start()
             .await?)
     }
