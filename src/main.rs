@@ -93,7 +93,7 @@ where
         }
 
         fn gen_table_id(rng: &mut impl Rng) -> TableId {
-            rng.gen_range(0..1000).into()
+            rng.gen_range(0..10).into()
         }
 
         let op: Op = {
