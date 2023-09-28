@@ -6,17 +6,25 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.75"
 async-trait = "0.1.73"
 chrono = "0.4.31"
+# derive to use derive(Parser) for arguments
+# env to allow passing sensible args via env vars
+clap = { version = "4.4.5", features = ["derive", "env"] }
 deadpool-postgres = "0.11.0"
 derive_more = "0.99.17"
 rand = "0.8.5"
 thiserror = "1.0.49"
+# macros to use #[tokio::main]
 # rt + rt-multi-thread is for starting tokio runtimes in main in storage test suite
+# signal to listen for Ctrl+C
 # sync is for tokio::sync::Mutex in memory storage
-tokio = { version = "1.32.0", features = ["rt", "rt-multi-thread", "sync"] }
+tokio = { version = "1.32.0", features = ["macros", "rt", "rt-multi-thread", "signal", "sync"] }
 # This version should be compatible with one in deadpool-postgres
 # array-impls to pass arrays to queries (e.g. a = ANY($1))
 # with-chrono-0_4 to encode-decode between chrono::DateTime and TIMESTAMP
 tokio-postgres = { version = "0.7.2", features = ["array-impls", "with-chrono-0_4"] }
+tokio-util = "0.7.9"
 tracing = "0.1.37"
+tracing-subscriber = { version = "0.3.17", features = ["env-filter"]}

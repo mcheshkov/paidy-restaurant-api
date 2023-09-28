@@ -21,3 +21,6 @@ You can use `docker-compose up`, or run it explicitly using something like this:
 
 And then run tests with
 `PG_HOST=localhost PG_PORT=5432 PG_USER=paidy PG_PASS=paidy cargo test -- --ignored`
+
+To run load simulator first start PostgreSQL, just as with test, and then run something like this
+`POSTGRES_USERNAME=paidy POSTGRES_PASSWORD=paidy RUST_LOG=info cargo run --release -- --postgres-host localhost --postgres-database paidy --postgres-pool 50 --tasks 50`
