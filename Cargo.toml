@@ -9,3 +9,6 @@ edition = "2021"
 async-trait = "0.1.73"
 chrono = "0.4.31"
 derive_more = "0.99.17"
+# sync is for tokio::sync::Mutex in memory storage
+tokio = { version = "1.32.0", features = ["sync"] }
+tracing = "0.1.37"
