@@ -3,10 +3,10 @@ use chrono::{DateTime, Utc};
 use derive_more::From;
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone, From)]
-pub struct TableId(i32);
+pub struct TableId(pub(super) i32);
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone, From)]
-pub struct ItemId(i32);
+pub struct ItemId(pub(super) i32);
 
 #[derive(Clone)]
 pub struct NewItem {

@@ -122,3 +122,15 @@ impl Storage for SimpleMemoryStorage {
             .unwrap_or(None))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use crate::storage::testing::test_suite;
+
+    #[test]
+    fn test_memory_storage() {
+        test_suite(&|| async { SimpleMemoryStorage::default() }).unwrap()
+    }
+}
