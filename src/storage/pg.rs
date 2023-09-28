@@ -302,3 +302,36 @@ impl Storage for PostgresStorage {
         row.map(ItemInfoParser::parse_one).transpose()
     }
 }
+
+// This could be proper migrations with state tracking
+pub async fn init_db(pool: &Pool) -> Result<(), PostgresStorageError> {
+    let mut db = pool.get().await?;
+    let txn = db
+        .build_transaction()
+        .isolation_level(IsolationLevel::Serializable)
+        .start()
+        .await?;
+    txn.simple_query(
+        // language=PostgreSQL
+        "
+            CREATE TABLE
+                items
+            (
+                item_id SERIAL PRIMARY KEY,
+                table_id INT NOT NULL,
+                name TEXT NOT NULL,
+                comment TEXT NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL,
+                forecast_ready_at TIMESTAMPTZ NOT NULL
+            );
+
+            -- All requests operate on a single table_id
+            -- TODO Make it part of primary key? Partition? For small dataset should not matter
+            CREATE INDEX ON items (table_id);
+        ",
+    )
+    .await?;
+    txn.commit().await?;
+
+    Ok(())
+}
