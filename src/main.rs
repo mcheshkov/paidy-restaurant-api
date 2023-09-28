@@ -64,6 +64,8 @@ where
     use crate::service::NewItem;
     use crate::storage::model::TableId;
 
+    let mut known_item_ids = HashSet::new();
+
     loop {
         // Issuing queries non-stop, there's no need to use Future + select
         if token.is_cancelled() {
@@ -98,8 +100,6 @@ where
             let mut rng = rand::thread_rng();
             rng.gen()
         };
-
-        let mut known_item_ids = HashSet::new();
 
         match op {
             Op::Add => {
